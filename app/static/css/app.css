@@ -1,3 +1,55 @@
 body {
     padding-top: 5rem;
 }
+.overlay {
+    position: absolute;
+    bottom: 0;
+    background: rgb(0, 0, 0);
+    background: blue; /* Black see-through */
+    color: #f1f1f1;
+    width: 100%;
+    transition: .5s ease;
+    opacity:0;
+    color: white;
+    font-size: 20px;
+    padding: 20px;
+    text-align: center;
+}
+
+.image img {
+    width: 600px;
+    height: 600px;
+    padding-left: 30px;
+    margin-right: 0;
+}
+
+.btn, #home_btn1{
+    min-width:220px;
+    margin-right: 0.5em;
+}
+
+.btn, #home_btn2{
+    min-width:220px;
+    margin-right: 0.5em;
+}
+
+
+.container {
+    display: grid;
+    grid-template-rows: auto;
+    grid-template-columns: auto auto; 
+    margin: 20px 20px; 
+    grid-gap: 10px;
+    align-self:stretch; 
+    
+}
+
+
+.left{
+    grid: 1;
+}
+
+.image {
+    grid: 2;
+}
+

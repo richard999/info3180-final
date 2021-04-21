@@ -6,7 +6,7 @@ from .config import Config
 app = Flask(__name__)
 
 db = SQLAlchemy(app)
-
+csrf = CSRFProtect(app)
 # Flask-Login login manager
 login_manager = LoginManager()
 login_manager.init_app(app)
