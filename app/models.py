@@ -1,4 +1,6 @@
 from . import db
+from werkzeug.security import generate_password_hash
+from flask_login._compat import unicode
 
 
 class Users(db.Model):
@@ -11,6 +13,20 @@ class Users(db.Model):
     biography= db.Column(db.String(240))
     photo= db.Column(db.String(80))
     datejoined= db.Colum(db.DateTime)
+    
+     def __init__(self, username, password, name, email, location, biography, photo,datejoined):
+        self.username = username
+        self.password = generate_password_hash(password, method='pbkdf2:sha256')
+        self.name = name
+        self.email = email
+        self.location= location
+        self.biography=biography
+        self.photo= photo
+        self.datejoined= datejoined
+        
+        
+        
+
 
     def is_authenticated(self):
         return True
@@ -41,4 +57,40 @@ class Cars(db.Model):
     cartype= db.column(db.String(80))
     price= db.Column(db.Float)
     photo= db.Column(db.String(80))
+    # foriegn key needs to be added here
+    user_id= db.Column(db.Integer)
     
+     def __init__(self, description, make, model, colour, year, transmission, car_type, price, photo, user_id ):
+        self.description = description
+        self.make = make
+        self.model = model
+        self.colour = colour
+        self.year= year
+        self.transmission=transmission
+        self.car_type= car_type
+        self.price= price
+        self.photo= photo
+        self.user_id= user_id
+
+    def get_id(self):
+        try:
+            return unicode(self.id)  # python 2 support
+        except NameError:
+            return str(self.id)  # python 3 support
+
+class Favourites(db.Model):
+    
+    id= db.Column(db.Integer, primary_key=True)
+    carid= db.Column(db.Integer)
+    user_id= db.Column(db.Integer)
+    
+     def __init__(self, carid, user_id ):
+        self.carid= carid
+        self.user_id= user_id
+
+    def get_id(self):
+        try:
+            return unicode(self.id)  # python 2 support
+        except NameError:
+            return str(self.id)  # python 3 support
+

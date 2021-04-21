@@ -24,7 +24,7 @@ class NewCar(FlaskForm):
     color= StringField('Color', validators=[InputRequired()])
     year= StringField('Year', validators=[InputRequired()])
     price = StringField('Price', validators=[InputRequired()])
-    cartype= SelectField('Car Type', choices=[('Sedan','Sedan'),('Suv','Suv'),('Crossover','Crossover'),('Hatchback','Hatchback'),
+    cartype= SelectField('Car Type', choices=[('Sedan','Sedan'),('Coupe','Coupe'),('Suv','Suv'),('Crossover','Crossover'),('Hatchback','Hatchback'),
                                               ('Truck','Truck'),('Pickup','Pickup'),('Bus','Bus')])
     transmission= SelectField('Transmission', choices=[('Automatic','Automatic'),('Manual','Manual'),('Electric','Electric')])
     description= TextAreaField('Description', validators=[InputRequired()])
