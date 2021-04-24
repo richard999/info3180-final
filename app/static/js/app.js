@@ -493,9 +493,9 @@ const Explore ={
                             {{car.model}}
                             {{car.id}}
                         </div>
-                        <router-link :to="{name: 'cars', params: { car_id : car.id}}" > View more details
-                        </router-link>
                         <div class="btn btn-primary" id="viewCar">
+                        <router-link  class="nav-link" :to="{name: 'cars', params: { car_id : car.id}}" > View more details
+                        </router-link>
                         </div>
                       </div>
                     </li>
@@ -675,43 +675,43 @@ const UserProfile={
     name: 'UserProfile',
     template:
      `
-     <div calss="UserBody>
-     <div class="alert alert-success " v-if="status === 'success'" >{{message}}
-     </div>
-     <div class="alert alert-danger"  v-if="status === 'danger'">
-     <ul>
-     <li v-for="error in errors" class=""> {{error}} </li>
-     </ul>
-     </div>
+     <div class="profilebody">
+            <div class="alert alert-success" v-if="status === 'success'" >{{message}}
+            </div>
+            <div class="alert alert-danger"  v-if="status === 'danger'">
+            <ul>
+            <li v-for="error in errors" class=""> {{error}} </li>
+            </ul>
+            </div>
 
-     <div calss="usercard" v-if="user !==null">
-     <img v-bind:src="'/static/uploads/' + user.photo" /> 
-       {{user.name}}
-       {{user.username}}
-       {{user.biography}}
-       {{user.email}}
-       {{user.location}}
-       {{user.date_joined}}
-     </div>
-     <div calss="carsBody" v-if="cars !==[]">
-     <ul class="carslist">
-         <li v-for="car in cars" class="car"> 
-           <div class="card ">
-             <div class="card-body">
-                 <span class ="card-title">{{ car.year }} {{car.make}}}</span>
-                 <img v-bind:src="'/static/uploads/' + car.photo" /> 
-                 {{car.price}}
-                 {{car.model}}
-                 {{car.id}}
-             </div>
-             <div class="btn btn-primary" id="viewCar">
-             <router-link :to="{name: 'cars', params: { car_id : car.id}}" > View Car
-             </router-link>
-             </div>
-           </div>
-        </li>
-     </ul>
-    </div>
+            <div calss="usercard" v-if="user !==null">
+            <img v-bind:src="'/static/uploads/' + user.photo" /> 
+            {{user.name}}
+            {{user.username}}
+            {{user.biography}}
+            {{user.email}}
+            {{user.location}}
+            {{user.date_joined}}
+            </div>
+            <div calss="carsBody" v-if="cars !==[]">
+            <ul class="carslist">
+                <li v-for="car in cars" class="car"> 
+                <div class="card ">
+                    <div class="card-body">
+                        <span class ="card-title">{{ car.year }} {{car.make}}}</span>
+                        <img v-bind:src="'/static/uploads/' + car.photo" /> 
+                        {{car.price}}
+                        {{car.model}}
+                        {{car.id}}
+                    </div>
+                    <div class="btn btn-primary" id="viewCar">
+                    <router-link class="nav-link" :to="{name: 'cars', params: { car_id : car.id}}" >   <span> View Car </span>
+                    </router-link>
+                    </div>
+                </div>
+                </li>
+            </ul>
+            </div>
     </div>
 
      `,
