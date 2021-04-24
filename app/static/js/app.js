@@ -7,19 +7,30 @@ const app = Vue.createApp({
     }
 });
 
+/**
+ * Header
+ * 
+ */
 app.component('app-header', {
     name: 'AppHeader',
     data (){
          
         return {islogin: false,
+               user_id:null,
+
          }
     },
     mounted() {
            if (localStorage.getItem("token") ===null)
            {
               this.islogin=false;
+  
            }else{
               this.islogin=true;
+              var decoded = jwtDecode(localStorage.getItem("token"));
+              this.user_id=decoded.payload.user_id;
+              console.log(this.user_id);
+
 
            }
     }, 
@@ -32,7 +43,7 @@ app.component('app-header', {
     
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
-          <li class="nav-item active">
+          <li class="nav-item active" v-if="islogin ===false">
             <router-link class="nav-link" to="/">Home <span class="sr-only">(current)</span></router-link>
           </li>
           <li v-if="islogin ===false" class="nav-item active"  >
@@ -40,6 +51,9 @@ app.component('app-header', {
           </li>
           <li v-if="islogin ===false" class="nav-item active" >
             <router-link class="nav-link" to="/login"> Login <span class="sr-only">(current)</span></router-link>
+          </li>
+          <li v-if="user_id !==null" class="nav-item active" >
+          <router-link class="nav-link" :to="{name: 'users', params: { user_id : user_id}}" > My Profile  <span class="sr-only">(current)</span>  </router-link>
           </li>
           <li class="nav-item active" >
             <router-link class="nav-link" to="/explore"> Explore <span class="sr-only">(current)</span></router-link>
@@ -50,9 +64,6 @@ app.component('app-header', {
           <li class="nav-item active" v-if="islogin">
            <router-link class="nav-link" to="/logout"> Logout <span class="sr-only">(current)</span></router-link>
           </li>
-
-
-
           
         </ul>
       </div>
@@ -60,6 +71,10 @@ app.component('app-header', {
     `
 });
 
+/**
+ * Footer
+ * 
+ */
 
 app.component('app-footer', {
     name: 'AppFooter',
@@ -76,7 +91,10 @@ app.component('app-footer', {
         }
     }
 });
-
+/**
+ * Home
+ * 
+ */
 const Home = {
     name: 'Home',
     template: `
@@ -98,6 +116,10 @@ const Home = {
 };
 
 
+/**
+ * Login Form
+ * 
+ */
 
 const LoginForm = {
     name: "login-form",
@@ -191,6 +213,10 @@ const LoginForm = {
 
 };
 
+/**
+ * Registration Form
+ * 
+ */
 
 const RegisterForm = {
     name: "register-form",
@@ -274,18 +300,21 @@ const RegisterForm = {
     },  
 
 };
+/**
+ * Add bew Car camponent 
+ * 
+ */
 
 const newCar={
     name: "NewCar",
     template:
     `
+    <div class="Newcarbox">
     <div  v-if="displayFlash">
     <ul>
     <li v-for="error in errors" class=""> {{error}} </li>
     </ul>
     </div>   
-
-    <div class="Newcarbox">
     <form v-on:submit.prevent="addCar"  method="POST" enctype="multipart/form-data" id="addCarForm" >
         <div class="form-group">
             <label class="newcarLabel" for="make">Make</label>
@@ -391,22 +420,34 @@ const newCar={
 
 
 }
-
+/**
+ * 
+ * Logout not working
+ */
 const Logout ={
     name: 'Logout',
-    mounted: 
+    template:
+    `Logout
+    `
+    ,mounted: 
     function()
     {
         if (localStorage.getItem("token")!==null) {
             fetch("/api/auth/logout", {
-                method: 'GET',
+                method: 'POST',
+                body:{},
                 headers: {
-                  "Content-type": "application/json"
-            },}).then(function (response) {
+                    Authorization: "Bearer " + localStorage.getItem("token"),
+                    'X-CSRFToken': token,
+
+                },
+                credentials: 'same-origin'
+                }).then(function (response) {
                  return response.json();
                 })
                 .then(function (jsonResponse) {
-                    localStorage.removeItem("token");
+                    //localStorage.removeItem("token");
+                    console.log(jsonResponse);
                     router.push('/');
                 }).catch(function (error) {
                     console.log(error);
@@ -414,16 +455,20 @@ const Logout ={
 
         }else{
             let message="User is already logout";
-            localStorage.setItem(message);
+            localStorage.setItem("flash",message);
     }
 }
 }
 
+/**
+ * Explore 
+ * 
+ */
 const Explore ={
     name: 'Explore',
     template: `
      <div>
-        <div class="searchform" v-if="mode==='List'" >
+        <div class="searchform"  >
             <form  v-on:submit.prevent="Search" method="post"  id="searchBox">
                 <div class="form-group">
                     <label class="searchLabel" for="make">Make</label>
@@ -436,9 +481,9 @@ const Explore ={
                 <button  type="submit" name="submit" id="up" class="btn btn-sucess">Search</button>
             </form>
         </div>
-        <div class="exBody"  v-if="mode==='List'">
+        <div class="exBody">
             <div calss="carsBody">
-                <ul class="carslist">
+                <ul class="carslist" v-if="cars !==[]">
                     <li v-for="car in cars" class="car"> 
                       <div class="card ">
                         <div class="card-body">
@@ -446,52 +491,22 @@ const Explore ={
                             <img v-bind:src="'/static/uploads/' + car.photo" /> 
                             {{car.price}}
                             {{car.model}}
+                            {{car.id}}
                         </div>
-                        <button  type="submit" name="submit" id="up" class="btn btn-primary"  v-on:click="View(car.id)">View More Details</button>
+                        <router-link :to="{name: 'cars', params: { car_id : car.id}}" > View more details
+                        </router-link>
+                        <div class="btn btn-primary" id="viewCar">
+                        </div>
                       </div>
                     </li>
                 </ul>
             </div>
         </div>
-        <div class="exBody"  v-if="mode==='Single'">
-
-
-        <div class="alert alert-success " v-if="status === 'success'" >{{message}}
-        </div>
-        <div class="alert alert-danger"  v-if="status === 'danger'">
-        <ul>
-        <li v-for="error in errors" class=""> {{error}} </li>
-        </ul>
-        </div>
-
-
-           <div class="card ">
-            <div class="card-body">
-            <span class ="card-title">{{ car.year }} {{car.make}}}</span>
-            <img v-bind:src="'/static/uploads/' + car.photo" /> 
-            {{car.description}}
-            {{car.price}}
-            {{car.model}}
-
-        </div>
-        <button  type="submit" name="submit" id="up" class="btn btn-primary"  >Email Owner</button>
-        <button  type="submit" name="submit" v-on:click="Fav(car.id)"><img src="/static/img/favourite.png">
-        </button> 
-      </div>
-
-
-
-        </div>
-
-   
     </div>
     `,
     data(){
         return {
-            mode:"List",
-            message:"",
             cars:[],
-            car:null,
             erros: [],
             status: ''
             }
@@ -546,27 +561,77 @@ const Explore ={
                 self.errors=error;
             });
         },
-        View:function(carid){
-            let self = this;
-            fetch("/api/cars/"+carid, {
-                method: 'GET',
-                headers: {
-                    Authorization: "Bearer " + localStorage.getItem("token"),
-                },
-                credentials: 'same-origin'
+        
+   }
+
+    }
+
+
+/**
+ * Car Details
+ * 
+ */
+const Car={
+    name: 'Car',
+    template:
+     `
+     <div class="exBody">
+
+     <div class="alert alert-success " v-if="status === 'success'" >{{message}}
+     </div>
+     <div class="alert alert-danger"  v-if="status === 'danger'">
+     <ul>
+     <li v-for="error in errors" class=""> {{error}} </li>
+     </ul>
+     </div>
+
+
+        <div class="card " v-if="car !==null">
+         <div class="card-body">
+         <span class ="card-title">{{ car.year }} {{car.make}}}</span>
+         <img v-bind:src="'/static/uploads/' + car.photo" /> 
+         {{car.description}}
+         {{car.price}}
+         {{car.model}}
+
+     </div>
+     <button  type="submit" name="submit" id="up" class="btn btn-primary"  >Email Owner</button>
+     <button  type="submit" name="submit" v-on:click="Fav(car.id)"><img src="/static/img/favourite.png">
+     </button> 
+   </div>
+     </div>
+     `,
+    data(){
+        return {
+            message:"",
+            car:null,
+            errors: [],
+            status: ''
+            }
+    },
+    created(){
+        let self = this;
+        let car_id=this.$route.params.car_id
+        fetch("/api/cars/"+car_id, {
+            method: 'GET',
+            headers:
+            {
+                'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                
+            },
+            credentials: 'same-origin'
             }).then(function (response) {
-                return response.json();
-
+             return response.json();
             }).then(function (jsonResponse) {
-
-                //router.push({ path: `/cars/`,params: { car_id: carid } })
                 self.car=jsonResponse;
-                console.log(jsonResponse);
-
-            }) .catch(function (error) {
-                self.errors=error;
+              console.log(jsonResponse);
+            }).catch(function (error) {
+                console.log(error);
             });
-        },
+
+    },
+    methods: 
+    {  
         Fav:function(carid){
             let self = this;
             fetch("/api/cars/"+parseInt(carid)+"/favourite", {
@@ -597,16 +662,20 @@ const Explore ={
                 self.errors=error;
             });
         }
+    
     }
 
 }
 
-const Car={
-    name: 'Car',
+/**
+ * User profile
+ */
+
+const UserProfile={
+    name: 'UserProfile',
     template:
      `
-     <div class="exBody">
-
+     <div calss="UserBody>
      <div class="alert alert-success " v-if="status === 'success'" >{{message}}
      </div>
      <div class="alert alert-danger"  v-if="status === 'danger'">
@@ -615,76 +684,95 @@ const Car={
      </ul>
      </div>
 
-
-        <div class="card ">
-         <div class="card-body">
-         <span class ="card-title">{{ car.year }} {{car.make}}}</span>
-         <img v-bind:src="'/static/uploads/' + car.photo" /> 
-         {{car.description}}
-         {{car.price}}
-         {{car.model}}
-
+     <div calss="usercard" v-if="user !==null">
+     <img v-bind:src="'/static/uploads/' + user.photo" /> 
+       {{user.name}}
+       {{user.username}}
+       {{user.biography}}
+       {{user.email}}
+       {{user.location}}
+       {{user.date_joined}}
      </div>
-     <button  type="submit" name="submit" id="up" class="btn btn-primary"  >Email Owner</button>
-     <button  type="submit" name="submit" v-on:click="Fav(car.id)"><img src="/static/img/favourite.png">
-     </button> 
-   </div>
-
-
-
-     </div>
-
+     <div calss="carsBody" v-if="cars !==[]">
+     <ul class="carslist">
+         <li v-for="car in cars" class="car"> 
+           <div class="card ">
+             <div class="card-body">
+                 <span class ="card-title">{{ car.year }} {{car.make}}}</span>
+                 <img v-bind:src="'/static/uploads/' + car.photo" /> 
+                 {{car.price}}
+                 {{car.model}}
+                 {{car.id}}
+             </div>
+             <div class="btn btn-primary" id="viewCar">
+             <router-link :to="{name: 'cars', params: { car_id : car.id}}" > View Car
+             </router-link>
+             </div>
+           </div>
+        </li>
+     </ul>
+    </div>
+    </div>
 
      `,
-    data(){
+     data(){
         return {
             message:"",
             cars:[],
-            car:null,
-            erros: [],
+            user:null,
+            errors: [],
             status: ''
             }
-    },
-    created(){
-
-    }, 
-    methods: {  
-        Fav:function(carid){
-            const data = { "carid": carid };
-            let self = this;
-            fetch("/api/cars/"+carid+"/favourite", {
-                method: 'POST',
-                body: JSON.stringify(data),
-                headers: {
-                    Authorization: "Bearer " + localStorage.getItem("token"),
-                },
-                credentials: 'same-origin'
+    },created(){
+        let self = this;
+        let user_id=this.$route.params.user_id
+        fetch("/api/users/"+user_id, {
+            method: 'GET',
+            headers:
+            {
+                'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                
+            },
+            credentials: 'same-origin'
             }).then(function (response) {
-                return response.json();
-
+             return response.json();
             }).then(function (jsonResponse) {
-                console.log(jsonResponse);
-                if(jsonResponse.hasOwnProperty('errors')){
-                    self.erros=jsonResponse.errors;
-                    self.status='danger';
-
-
-                }else{
-                    self.status='success';
-                    self.message=jsonResponse.message;
-
-                }
-
-            }) .catch(function (error) {
-                self.errors=error;
+                self.user=jsonResponse;
+              console.log(jsonResponse);
+            }).catch(function (error) {
+                console.log(error);
             });
-        }
+     },mounted(){
+        let self = this;
+        let user_id=this.$route.params.user_id
+        fetch("/api/users/"+user_id+"/favourites", {
+            method: 'GET',
+            headers:
+            {
+                'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                
+            },
+            credentials: 'same-origin'
+            }).then(function (response) {
+             return response.json();
+            }).then(function (jsonResponse) {
+                self.cars=jsonResponse;
+              console.log(jsonResponse);
+            }).catch(function (error) {
+                console.log(error);
+            });
 
-    
-    }
-
+     }
 }
 
+function jwtDecode(t) {
+    let token = {};
+    token.raw = t;
+    token.header = JSON.parse(window.atob(t.split('.')[0]));
+    token.payload = JSON.parse(window.atob(t.split('.')[1]));
+    return (token)
+  }
+  
 
 const NotFound = {
     name: 'NotFound',
@@ -705,7 +793,8 @@ const routes = [
     { path: "/login" , component: LoginForm},
     { path: "/logout" , component: Logout},
     { path: "/explore" , component: Explore},
-    { path: "/cars/:car_id",component:Car},
+    { path: "/users/:user_id",name: 'users',component:UserProfile},
+    { path: "/cars/:car_id",name: 'cars',component:Car},
     { path: "/cars/new" , component: newCar},
 
     
