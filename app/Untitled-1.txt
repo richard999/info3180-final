@@ -1,0 +1,51 @@
+errordata(){
+        return{
+            isSuccessUpload:false,
+            displayFlash:false,
+            errors: [],
+            successmessage:"",
+            errormessage:"",
+            
+        }
+    },
+    methods: {
+        registerUser(){
+            let self = this;
+            let registerForm = document.getElementById('registerForm');
+            let form_data = new FormData(registerForm);
+            fetch("/api/register", {
+                method: 'POST',
+                body: form_data,
+                headers: {
+                    'X-CSRFToken': token
+                     },
+                     credentials: 'same-origin'
+               })
+                .then(function (response) {
+                return response.json();
+                })
+                .then(function (jsonResponse) {
+                  if(jsonResponse.hasOwnProperty('id')){
+                        self.isSuccessUpload = true;
+                        router.go("/login");
+                    }else {
+                        self.isSuccessUpload = false;
+                        self.displayFlash=true;
+                        self.errors=jsonResponse.errors;
+                     }
+                
+                //this.successmessage = "File Uploaded Successfully"
+                // display a success message
+                console.log(jsonResponse);
+                })
+                .catch(function (error) {
+                //this.errormessage = "Something went wrong"
+                console.log(error);
+                self.errors= error;
+
+
+                });
+
+            }
+
+    },  
