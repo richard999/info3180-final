@@ -32,7 +32,7 @@ class NewCar(FlaskForm):
         FileRequired(), FileAllowed(['jpg', 'png', 'Images only!'])])
 
 class Search(FlaskForm):
-    make=make= StringField('Make Eg. Honda', validators=[InputRequired()])
-    model= StringField('Model Eg Civic',)
+    make=make= StringField()
+    model= StringField()
     
     

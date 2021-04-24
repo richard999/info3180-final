@@ -27,7 +27,7 @@ from app.forms import LoginForm,SignupForm,NewCar,Search
 def requires_token(f):
   @wraps(f)
   def decorated(*args, **kwargs):
-    auth = request.cookies.get('token', None)
+    auth = request.headers.get('Authorization', None) # or request.cookies.get('token', None)
 
     if not auth:
       return jsonify({'code': 'authorization_header_missing', 'description': 'Authorization header is expected'}), 401
@@ -195,7 +195,6 @@ def logout():
 @app.route("/api/cars",methods=["GET", "POST"])
 @requires_token
 def cars():
-    print("""""""""""""""""""""""""""""""""""""""""""""int""""""""""""""""""""""""""""""""""""""""""""")
     if request.method == "POST":
         form=NewCar()
         if form.validate_on_submit():
@@ -210,51 +209,132 @@ def cars():
             photo= form.photo.data
             filename = secure_filename(photo.filename)
             photo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            car=Cars(description=description, make=make, model=model, colour=color, year=year, transmission=transmission, car_type=cartype, price=price,photo=filename, user_id=current_user.get_id)
+            id=current_user.get_id()
+            car=Cars(description=description, make=make, model=model, colour=color, year=year, transmission=transmission, car_type=cartype, price=price,photo=filename, user_id=id)
             db.session.add(car)
             db.session.commit()
-            send={"message":"Car Added Sucessfull"}
+            send={"message":["Car Added Sucessfull"]}
             return jsonify(send)
         else:
             response = {"errors": form_errors(form)}
             return  jsonify(response)
-
-
-
-
-    
-
-
-
-
-
-
-
-
-
-        pass
     elif request.method=="GET":
-        pass
-    pass
-@app.route("/api/cars/<int:car_id>")
+        cars=Cars.query.order_by(Cars.id).limit(3).all()[::-1]
+        lst=[]
+        for car in cars:
+            car={"id": car.id,
+                 "description": car.description,
+                 "year": car.year,
+                 "make": car.make,
+                 "model": car.model,
+                 "colour": car.colour,
+                 "transmission": car.transmission,
+                 "cartype": car.car_type,
+                 "price": car.price,
+                 "photo": car.photo,
+                  "user_id": car.user_id
+                  }
+            lst.append(car)
+        return jsonify(lst)
+
+
+@app.route("/api/cars/<int:car_id>",methods=["GET"])
+@requires_token
 def getCar(car_id):
-    pass
-@app.route("/api/cars/<int:car_id>/favourite")
+    if request.method=="GET":
+        car=Cars.query.get_or_404(car_id)
+        if car!="404":
+            car={"id": car.id,
+                 "description": car.description,
+                 "year": car.year,
+                 "make": car.make,
+                 "model": car.model,
+                 "colour": car.colour,
+                 "transmission": car.transmission,
+                 "cartype": car.car_type,
+                 "price": car.price,
+                 "photo": car.photo,
+                  "user_id": car.user_id
+            }
+            return jsonify(car)
+    return jsonify({"erros": ["invalid"]})
+@app.route("/api/cars/<int:car_id>/favourite",methods=["POST"])
+@requires_token
 def addToFav(car_id):
-    pass
-@app.route("/api/search")
+    if request.method=="POST":
+        if Favourites.query.filter_by(car_id=int(car_id),user_id=current_user.get_id()).first() is None:
+            fav=Favourites(car_id=int(car_id),user_id=current_user.get_id())
+            db.session.add(fav)
+            db.session.commit()
+            message={"message": "Car Successfully Favourited","car_id": car_id}
+        else:
+            message={ "errors": ["Car Already Favourited"],
+            "car_id": car_id,
+            }
+        return jsonify(message)
+
+@app.route("/api/search",methods=["POST"])
+@requires_token
 def search():
-    pass
+    form=Search()
+    if request.method=="POST" and form.validate_on_submit():
+            make=form.make.data
+            model=form.model.data
+            if len(model)==0 and len(model)==0:
+                cars=Cars.query.order_by(Cars.id).limit(3).all()[::-1]
+            elif len(model)==0:
+                cars=Cars.query.filter_by(make=make).all()
+            elif len(make)==0:
+                cars=Cars.query.filter_by(model=model).all()
+            else:
+                cars=Cars.query.filter_by(make=make,model=model).all()
+            lst=[]
+            for car in cars:
+                car={"id": car.id,
+                    "description": car.description,
+                    "year": car.year,
+                    "make": car.make,
+                    "model": car.model,
+                    "colour": car.colour,
+                    "transmission": car.transmission,
+                    "cartype": car.car_type,
+                    "price": car.price,
+                    "photo": car.photo,
+                    "user_id": car.user_id
+                    }
+                lst.append(car)
+            return jsonify(lst)
+    else:
+            esponse = {"errors": form_errors(form)}
+            return  jsonify(response)
+
 @app.route("/api/users/<int:user_id>")
+@requires_token
 def getUser(user_id):
-    pass
-
+    user=Users.query.filter_by(user_id=user_id).first()
+    send={
+        "id": user.id,
+        "username": user.username,
+        "name": user.name,
+        "photo": user.photo,
+        "email": user.email,
+        "location": user.location,
+        "biography": user.biography,
+        "date_joined": user.date_joined
+     }
+    return jsonify(send)
 @app.route("/api/users/<int:user_id>/favourites")
+@requires_token
 def getUserFav(user_id):
-    pass
-
-
-
+    favs=Favourites.query.filter_by(user_id=user_id).all()
+    lst=[]
+    for fav in favs:
+         car=Cars.query.get(fav.car_id)
+         cart={"id": car.id,"description": car.description,"year": car.year,
+                 "make": car.make,"model": car.model,"colour": car.colour,"transmission": car.transmission,
+                 "cartype": car.car_type,"price": car.price,"photo": car.photo,"user_id": car.user_id}
+         lst.append(cart)
+    return jsonify(lst)
 
 @app.route('/secure-page')
 @login_required

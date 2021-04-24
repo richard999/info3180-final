@@ -15,16 +15,17 @@ app.component('app-header', {
          }
     },
     mounted() {
-           if (localStorage.getItem("token")!==null)
+           if (localStorage.getItem("token") ===null)
            {
-              islogin=true;
+              this.islogin=false;
            }else{
-              islogin=false;
+              this.islogin=true;
+
            }
     }, 
     template: `
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
-      <a class="navbar-brand" href="#">Lab 7</a>
+      <a class="navbar-brand" href="#">United Auto Sales</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -34,10 +35,10 @@ app.component('app-header', {
           <li class="nav-item active">
             <router-link class="nav-link" to="/">Home <span class="sr-only">(current)</span></router-link>
           </li>
-          <li class="nav-item active" v-if="!islogin"/ >
+          <li v-if="islogin ===false" class="nav-item active"  >
             <router-link class="nav-link" to="/register"> Register <span class="sr-only">(current)</span></router-link>
           </li>
-          <li class="nav-item active" v-if="!islogin"/>
+          <li v-if="islogin ===false" class="nav-item active" >
             <router-link class="nav-link" to="/login"> Login <span class="sr-only">(current)</span></router-link>
           </li>
           <li class="nav-item active" >
@@ -46,7 +47,7 @@ app.component('app-header', {
           <li class="nav-item active">
           <router-link class="nav-link" to="/cars/new"> Add Car <span class="sr-only">(current)</span></router-link>
           </li>
-          <li class="nav-item active" v-if="islogin"/>
+          <li class="nav-item active" v-if="islogin">
            <router-link class="nav-link" to="/logout"> Logout <span class="sr-only">(current)</span></router-link>
           </li>
 
@@ -357,8 +358,8 @@ const newCar={
             method: 'POST',
             body: form_data,
             headers: {
+                Authorization: "Bearer " + localStorage.getItem("token"),
                 'X-CSRFToken': token,
-                Authorization: "Bearer " + localStorage.getItem("token")
             },
             }).then(function (response) {
                 return response.json();
@@ -422,8 +423,8 @@ const Explore ={
     name: 'Explore',
     template: `
      <div>
-        <div class="searchform">
-            <form method="post" enctype="multipart/form-data"  id="searchBox">
+        <div class="searchform" v-if="mode==='List'" >
+            <form  v-on:submit.prevent="Search" method="post"  id="searchBox">
                 <div class="form-group">
                     <label class="searchLabel" for="make">Make</label>
                     <input type="text"  id="make" name="make" class="form-control">
@@ -435,20 +436,253 @@ const Explore ={
                 <button  type="submit" name="submit" id="up" class="btn btn-sucess">Search</button>
             </form>
         </div>
-        <div class="exBody">
-        
+        <div class="exBody"  v-if="mode==='List'">
+            <div calss="carsBody">
+                <ul class="carslist">
+                    <li v-for="car in cars" class="car"> 
+                      <div class="card ">
+                        <div class="card-body">
+                            <span class ="card-title">{{ car.year }} {{car.make}}}</span>
+                            <img v-bind:src="'/static/uploads/' + car.photo" /> 
+                            {{car.price}}
+                            {{car.model}}
+                        </div>
+                        <button  type="submit" name="submit" id="up" class="btn btn-primary"  v-on:click="View(car.id)">View More Details</button>
+                      </div>
+                    </li>
+                </ul>
+            </div>
         </div>
+        <div class="exBody"  v-if="mode==='Single'">
+
+
+        <div class="alert alert-success " v-if="status === 'success'" >{{message}}
+        </div>
+        <div class="alert alert-danger"  v-if="status === 'danger'">
+        <ul>
+        <li v-for="error in errors" class=""> {{error}} </li>
+        </ul>
+        </div>
+
+
+           <div class="card ">
+            <div class="card-body">
+            <span class ="card-title">{{ car.year }} {{car.make}}}</span>
+            <img v-bind:src="'/static/uploads/' + car.photo" /> 
+            {{car.description}}
+            {{car.price}}
+            {{car.model}}
+
+        </div>
+        <button  type="submit" name="submit" id="up" class="btn btn-primary"  >Email Owner</button>
+        <button  type="submit" name="submit" v-on:click="Fav(car.id)"><img src="/static/img/favourite.png">
+        </button> 
+      </div>
+
+
+
+        </div>
+
    
     </div>
     `,
     data(){
         return {
+            mode:"List",
+            message:"",
+            cars:[],
+            car:null,
             erros: [],
             status: ''
             }
     },
-    methods:{
+    created(){
+        let self = this;
+        fetch("/api/cars", {
+            method: 'GET',
+            headers:
+            {
+                'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                
+            },
+            credentials: 'same-origin'
+            }).then(function (response) {
+             return response.json();
+            }).then(function (jsonResponse) {
+                self.cars=jsonResponse;
+              console.log(jsonResponse);
+            }).catch(function (error) {
+                console.log(error);
+            });
+
+    },
+    methods:  
+     {  
+        Search:function(){
+            let self = this;
+            let searchform = document.getElementById('searchBox');
+            let form_data = new FormData(searchform);
+    
+            fetch("/api/search", {
+                method: 'POST',
+                body: form_data,
+                headers: {
+                    Authorization: "Bearer " + localStorage.getItem("token"),
+                    'X-CSRFToken': token,
+
+            },
+            }).then(function (response) {
+                return response.json();
+
+            }).then(function (jsonResponse) {
+                if(jsonResponse.hasOwnProperty('errors')){
+                    self.errors=errors
+                 }else{
+                     self.cars=jsonResponse;
+                 }
+                console.log(jsonResponse);
+
+            }) .catch(function (error) {
+                self.errors=error;
+            });
+        },
+        View:function(carid){
+            let self = this;
+            fetch("/api/cars/"+carid, {
+                method: 'GET',
+                headers: {
+                    Authorization: "Bearer " + localStorage.getItem("token"),
+                },
+                credentials: 'same-origin'
+            }).then(function (response) {
+                return response.json();
+
+            }).then(function (jsonResponse) {
+
+                //router.push({ path: `/cars/`,params: { car_id: carid } })
+                self.car=jsonResponse;
+                console.log(jsonResponse);
+
+            }) .catch(function (error) {
+                self.errors=error;
+            });
+        },
+        Fav:function(carid){
+            let self = this;
+            fetch("/api/cars/"+parseInt(carid)+"/favourite", {
+                method: 'POST',
+                headers: {
+                    Authorization: "Bearer " + localStorage.getItem("token"),
+                    'X-CSRFToken': token
+                },
+                credentials: 'same-origin'
+
+            }).then(function (response) {
+                return response.json();
+
+            }).then(function (jsonResponse) {
+                console.log(jsonResponse);
+                if(jsonResponse.hasOwnProperty('errors')){
+                    self.errors=jsonResponse.errors;
+                    self.status='danger';
+
+
+                }else{
+                    self.status='success';
+                    self.message=jsonResponse.message;
+
+                }
+
+            }) .catch(function (error) {
+                self.errors=error;
+            });
+        }
     }
+
+}
+
+const Car={
+    name: 'Car',
+    template:
+     `
+     <div class="exBody">
+
+     <div class="alert alert-success " v-if="status === 'success'" >{{message}}
+     </div>
+     <div class="alert alert-danger"  v-if="status === 'danger'">
+     <ul>
+     <li v-for="error in errors" class=""> {{error}} </li>
+     </ul>
+     </div>
+
+
+        <div class="card ">
+         <div class="card-body">
+         <span class ="card-title">{{ car.year }} {{car.make}}}</span>
+         <img v-bind:src="'/static/uploads/' + car.photo" /> 
+         {{car.description}}
+         {{car.price}}
+         {{car.model}}
+
+     </div>
+     <button  type="submit" name="submit" id="up" class="btn btn-primary"  >Email Owner</button>
+     <button  type="submit" name="submit" v-on:click="Fav(car.id)"><img src="/static/img/favourite.png">
+     </button> 
+   </div>
+
+
+
+     </div>
+
+
+     `,
+    data(){
+        return {
+            message:"",
+            cars:[],
+            car:null,
+            erros: [],
+            status: ''
+            }
+    },
+    created(){
+
+    }, 
+    methods: {  
+        Fav:function(carid){
+            const data = { "carid": carid };
+            let self = this;
+            fetch("/api/cars/"+carid+"/favourite", {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {
+                    Authorization: "Bearer " + localStorage.getItem("token"),
+                },
+                credentials: 'same-origin'
+            }).then(function (response) {
+                return response.json();
+
+            }).then(function (jsonResponse) {
+                console.log(jsonResponse);
+                if(jsonResponse.hasOwnProperty('errors')){
+                    self.erros=jsonResponse.errors;
+                    self.status='danger';
+
+
+                }else{
+                    self.status='success';
+                    self.message=jsonResponse.message;
+
+                }
+
+            }) .catch(function (error) {
+                self.errors=error;
+            });
+        }
+
+    
+    }
+
 }
 
 
@@ -471,6 +705,7 @@ const routes = [
     { path: "/login" , component: LoginForm},
     { path: "/logout" , component: Logout},
     { path: "/explore" , component: Explore},
+    { path: "/cars/:car_id",component:Car},
     { path: "/cars/new" , component: newCar},
 
     
