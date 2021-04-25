@@ -138,6 +138,7 @@ def form_errors(form):
 
 @app.route("/api/auth/login", methods=["POST"])
 def login():
+    logout_user()
     if current_user.is_authenticated:
         return jsonify({"errors": ["User loged in"]}),406
 
@@ -168,6 +169,7 @@ def login():
                 login_user(user, remember=remember_me)
                 #token
                 payload = {
+                    'user_id':user.id,
                     'username': user.username,
                     'iat': datetime.datetime.now(datetime.timezone.utc),
                     'exp': datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=2)}
@@ -185,7 +187,7 @@ def login():
         return  jsonify(response),401
 
 
-@app.route('/api/auth/logout', methods=['GET'])
+@app.route('/api/auth/logout', methods=['POST'])
 @requires_token
 def logout():
     logout_user()
@@ -311,7 +313,7 @@ def search():
 @app.route("/api/users/<int:user_id>")
 @requires_token
 def getUser(user_id):
-    user=Users.query.filter_by(user_id=user_id).first()
+    user=Users.query.filter_by(id=user_id).first()
     send={
         "id": user.id,
         "username": user.username,

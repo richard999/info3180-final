@@ -16,5 +16,5 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     """Production Config that extends the Base Config Object"""
     DEBUG = False
-    #set DATABASE_URL=postgresql://project1:project1@localhost/project1
+    #set DATABASE_URL=postgresql://info3180-project2-user:info3180-project2@localhost/info3180-project2
     #"postgresql://info3180-project2-user:info3180-project2@localhost/info3180-project2"
