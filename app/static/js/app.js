@@ -98,19 +98,19 @@ app.component('app-footer', {
 const Home = {
     name: 'Home',
     template: `
-    <div class="container">
-        <div class = "left">
-            <h2> Buy and Sell Cars Online </h2>
-            <p> United Sales Auto Sales </p>
-
-        <div class = 'btns'>
-            <button id="home_btn1" @click="$router.push('register')" type="button" class="btn btn-success">Register</button>
-            <button id="home_btn2" @click="$router.push('login')" type="button" class="btn btn-primary">Login</button>
-             
-        <div class = "image">
-            <img src="/static/370z.jpg" alt="Nissan 370Z">
+    <div class="d-flex align-items-center home-div col-md-12">
+    <div class="row align-items-center col-md-6 intro">
+        <h1 class="font-weight-bold">Buy and Sell Cars Online</h1>
+        <p class="mt-2 mb-4 text-secondary">United Auto Sales provides the fastest, easiest and most user friendly way to buy or sell cars online. Find a Great Price on the Vehicle You Want</p>
+        <div class="flex-area">
+            <button @click="toRegister" class="btn bg-primary text-white" type="button">Resister</button>
+            <button @click="toLogin" class="btn text-white Dahalia-Rodje-color" type="button">Login</button>
         </div>
     </div>
+    <div class="fit col-md-6">
+        <img class="" src="static/images/homepage.jpg">
+    </div>
+</div>
     `,
     data() {
         return {}
@@ -487,60 +487,46 @@ const Logout ={
 const Explore ={
     name: 'Explore',
     template: `
-    <div>
-        <div class = "explore-container">
-            <h2> Explore </h2>
-            
-        
-            <form v-on:submit.prevent="exploreSearch" method="GET" enctype="multipart/form-data" id="searchForm">
-            <div class = "explore-card">
-                <div class="form-group">
-                    <div class = "form-row">
-                        <div class = "col">
-                            <label> Make </label><br>
-                            <input type="text" class = "form-control" name="searchbymake" v-model="searchMake"><br>
-                        </div>
-                        <div class = "col">
-                            <label> Model </label><br>
-                            <input type="text" class = "form-control" name="searchbymodel" v-model="searchModel"><br>
-                        </div>
-                    
+    <div class="container maincontainer" >
+    <div id="displayexplore">
+        <h1>Explore</h1>
+        <div id="explore-search">
+            <form id="explore-form" method="GET" @submit.prevent="search()">
+                <div class="form-group col-4">
+                    <label for="make">Make</label>
+                    <input type="text" class="form-control" name="make" />
+                </div>
+                <div class="form-group col-4">
+                    <label for="model">Model</label>
+                    <input type="text" class="form-control" name="model" />
+                </div>
+                <div class="form-group search-btn-div">
+                    <button type="submit" class="btn btn-success Dahalia-Rodje-color search-btn">Search</button>
                     </div>
-                    <div class = "explore-btn">
-                        <button class="btn btn-success" > Search </button>
+            </form>
+        </div>  
+        <div class="carslist" v-if="listOfCars[0]">
+        <div v-for="cars in listOfCars">
+            <div class="card" style="width: 18rem;">
+                <img class="card-img-top favcar"  :src="cars.photo">
+                <div class="card-body">
+                    <div class="name-model-price">
+                        <div class="name-model">
+                            <span  class="car-name">{{cars.year.concat(" ",cars.make)}}</span>
+                            <span class="graytext">{{cars.model}}</span>
+                        </div>
+                        <a href="#" class="btn btn-success Dahalia-Rodje-color card-price-btn">
+                            <img class="icons" src='/static/images/tagicon.png'>
+                            <span><span>$</span>{{cars.price}}</span>
+                        </a>
                     </div>
-                    
+                    <a :href="cars.id" class="btn btn-primary card-view-btn" @click="getCarDetails">View more details</a>
                 </div>
             </div>
-            </form>
-            </div>
-            <ul class="explorelist">    
-            <li v-for="car in allcars">
-                
-                    <div class = "details-card-group">
-                        <div class ="details-card" style="width: 20rem;">
-                            <img class="card-img-top" id="car_img" :src="'/static/uploads/'  + car.photo" alt="car img"> 
-                                <div class = "card-body">
-                                    <div class = "top-card">
-                                        <h5 class = "card-title">  {{car.year}}  </h5>
-                                        <h5 class= "card-title">  {{car.make}}  </h5>
-                                        <div class="price">
-                                   <img id = "price-tag" src = "/static/price-tag.png">
-                                   <p class="card-text">  {{car.price}}  </p>
-                                </div>
-                                    </div>
-                                    <p class="card-text">  {{car.model}}  </p>
-                                </div>    
-                            
-                            <button @click="carinfo(car.id)" class="btn btn-primary btn-block"> View More Details </button>
-                        </div>
-                    </div>
-                
-            </li>
-            </ul>
-             
+        </div>
+        </div>
     </div>
-    
+</div>
     `,
     data(){
         return {
