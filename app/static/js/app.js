@@ -299,6 +299,7 @@ const RegisterForm = {
                 .then(function (jsonResponse) {
                     if(jsonResponse.hasOwnProperty('id')){
                         self.displayFlash = false;
+                        console.log(jsonResponse);
                         localStorage.setItem("flash","User Successfully registered");
                         router.push('/login');
                     }else{
@@ -330,12 +331,14 @@ const newCar={
     template:
     `
     <div class="Newcarbox">
-    <div  v-if="displayFlash">
+    <div class="alert alert-success " v-if="status === 'success'" >{{message}}
+    </div>
+    <div class="alert alert-danger"  v-if="status === 'danger'">
     <ul>
     <li v-for="error in errors" class=""> {{error}} </li>
     </ul>
-    </div>   
-    <form v-on:submit.prevent="addCar"  method="POST" enctype="multipart/form-data" id="addCarForm" >
+    </div>
+   <form v-on:submit.prevent="addCar"  method="POST" enctype="multipart/form-data" id="addCarForm" >
         <div class="form-group">
             <label class="newcarLabel" for="make">Make</label>
             <input type="text"  id="make" name="make" class="form-control">
@@ -417,12 +420,14 @@ const newCar={
                 // display a success/error messagemessage
                 if(jsonResponse.hasOwnProperty('message')){
                     self.displayFlash = true;
-                    self.errors=jsonResponse.message;
+                    self.message=jsonResponse.message;
                     self.status='success';
+                    addCarForm.reset();
+
                 }else{
                     self.displayFlash = true;
+                    self.status='danger';
                     self.errors=jsonResponse.errors;
-
                 }
                 console.log(jsonResponse);
                 })
@@ -440,6 +445,8 @@ const newCar={
 
 
 }
+
+
 /**
  * 
  * Logout not working
@@ -455,18 +462,16 @@ const Logout ={
         if (localStorage.getItem("token")!==null) {
             fetch("/api/auth/logout", {
                 method: 'POST',
-                body:{},
                 headers: {
                     Authorization: "Bearer " + localStorage.getItem("token"),
-                    'X-CSRFToken': token,
-
+                    'X-CSRFToken': token
                 },
                 credentials: 'same-origin'
                 }).then(function (response) {
                  return response.json();
                 })
                 .then(function (jsonResponse) {
-                    //localStorage.removeItem("token");
+                    localStorage.removeItem("token");
                     console.log(jsonResponse);
                     router.push('/');
                 }).catch(function (error) {
@@ -612,55 +617,40 @@ const Explore ={
 const Car={
     name: 'Car',
     template:
-     `
-     <div class="container-fluid">
-            <div class="carinfocard">
-                <div class="img-square-wrapper">
-                    <img id="car_img" :src="'/static/uploads/' + photo" alt="car img" class="card-img-top"> 
-                </div>
-                <div class = "card-body">
-                    <div class = "yearmake">
-                            <h2 class = "card-title">  {{ year }}  {{ make }} </h2> <br> 
-                    </div>
-                    <p class="model"> {{model}} </p>  
-                    <p class="card-text"> {{description}} </p>
-                    <div class = "form-row">
-                        <div class = "col">
-                            <label>Colour</label>
-                            <p class="card-text"> {{colour}} </p> <br>
-                        </div>
-                        <div class = "col">
-                            <label>Body Type</label>
-                            <p class="card-text"> {{car_type}} </p> <br>
-                        </div>
-                    </div>
-                    <div class = "form-row">
-                        <div class = "col">
-                            <label>Price</label>
-                            <p class="card-text"> {{price}} </p> <br>
-                        </div>
-                        <div class = "col">
-                            <label>Transmission</label>
-                            <p class="card-text"> {{transmission}} </p> <br>
-                        </div>
-                    </div>
-                    <div class = "carinfobtns">
-                        <button class="btn btn-success" > Email Owner </button>
-                        <button v-if="faved" type="button" class="btn btn-default btn-circle">
-                            <img src="/static/img/favorite.png"> 
-                        </button>
-                        <button v-else" @click="favouritecar(car_id)" type = "button" class="btn btn-default btn-circle" >  
-                            <img src="/static/img/outline.png"> 
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+     `     <div class="exBody">
+
+     <div class="alert alert-success " v-if="status === 'success'" >{{message}}
+     </div>
+     <div class="alert alert-danger"  v-if="status === 'danger'">
+     <ul>
+     <li v-for="error in errors" class=""> {{error}} </li>
+     </ul>
+     </div>
+
+
+        <div class="card " v-if="car !==null">
+         <div class="card-body">
+         <span class ="card-title">{{ car.year }} {{car.make}}}</span>
+         <img v-bind:src="'/static/uploads/' + car.photo" /> 
+         {{car.description}}
+         {{car.price}}
+         {{car.model}}
+
+     </div>
+     <button  type="submit" name="submit" id="up" class="btn btn-primary"  >Email Owner</button>
+     <button  type="submit" name="submit" v-on:click="Fav">
+     <img src="/static/img/f1.png" v-if="switchState==false">
+     <img src="/static/img/f2.png" v-if="switchState">
+
+
+     </button> 
+   </div>
     </div>
      `,
     data(){
         return {
             message:"",
+            switchState:false,
             car:null,
             errors: [],
             status: ''
@@ -686,12 +676,41 @@ const Car={
                 console.log(error);
             });
 
-    },
+    },mounted(){
+        let car_id=this.$route.params.car_id;
+        let self = this;
+        var decoded = jwtDecode(localStorage.getItem("token"));
+        let user_id=decoded.payload.user_id;
+        fetch("/api/users/"+user_id+"/favourites", {
+            method: 'GET',
+            headers:
+            {
+                'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                
+            },
+            credentials: 'same-origin'
+            }).then(function (response) {
+             return response.json();
+            }).then(function (jsonResponse) {
+            if (jsonResponse!=[]){
+                for (let i=0; i<jsonResponse.length ;i++) {
+                    if (jsonResponse[i].id==car_id){
+                        self.switchState=true;
+                        break
+                    } 
+                }
+            }
+            }).catch(function (error) {
+                console.log(error);
+            });
+
+     },
     methods: 
     {  
-        Fav:function(carid){
+        Fav:function(){
             let self = this;
-            fetch("/api/cars/"+parseInt(carid)+"/favourite", {
+            let car_id=this.$route.params.car_id
+            fetch("/api/cars/"+parseInt(car_id)+"/favourite", {
                 method: 'POST',
                 headers: {
                     Authorization: "Bearer " + localStorage.getItem("token"),
@@ -711,6 +730,7 @@ const Car={
 
                 }else{
                     self.status='success';
+                    self.switchState=true;
                     self.message=jsonResponse.message;
 
                 }
