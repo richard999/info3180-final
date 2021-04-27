@@ -134,7 +134,7 @@ def form_errors(form):
 
 
 
-#Register API
+#Login API
 
 @app.route("/api/auth/login", methods=["POST"])
 def login():
@@ -189,10 +189,11 @@ def login():
 
 @app.route('/api/auth/logout', methods=['POST'])
 @requires_token
+@requires_auth
 def logout():
-    logout_user()
-    message = { "message": "User Logged out Successfully"}
-    return jsonify(message)
+    user=g.current_user
+    return jsonify(data={"user": user}, message="User Logged Out Successfully")
+    
 
 @app.route("/api/cars",methods=["GET", "POST"])
 @requires_token
