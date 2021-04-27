@@ -6,6 +6,7 @@ This file creates your application.
 """
 
 from app import app, db, login_manager
+from sqlalchemy import desc
 from flask import render_template, request, redirect, url_for, flash,_request_ctx_stack,make_response,g,jsonify
 from flask_login import login_user, logout_user, current_user, login_required
 from app.forms import LoginForm
@@ -94,7 +95,6 @@ def register():
             db.session.add(user)
             db.session.commit()
             udict=dict(user.tojson())
-            print(udict)
             send={ "id":udict["id"],
                   "username":udict["username"],
                    "photo":udict["photo"],
@@ -222,7 +222,7 @@ def cars():
             response = {"errors": form_errors(form)}
             return  jsonify(response)
     elif request.method=="GET":
-        cars=Cars.query.order_by(Cars.id).limit(3).all()[::-1]
+        cars=Cars.query.order_by(desc(Cars.id)).limit(3).all()[::-1]
         lst=[]
         for car in cars:
             car={"id": car.id,
@@ -283,11 +283,11 @@ def search():
     if request.method=="POST" and form.validate_on_submit():
             make=form.make.data
             model=form.model.data
-            if len(model)==0 and len(model)==0:
-                cars=Cars.query.order_by(Cars.id).limit(3).all()[::-1]
-            elif len(model)==0:
+            if len(model)==0 and len(make)==0:
+                cars=Cars.query.all()
+            elif len(model)==0 and len(make)!=0:
                 cars=Cars.query.filter_by(make=make).all()
-            elif len(make)==0:
+            elif len(make)==0 and len(model)!=0:
                 cars=Cars.query.filter_by(model=model).all()
             else:
                 cars=Cars.query.filter_by(make=make,model=model).all()
