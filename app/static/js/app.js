@@ -279,6 +279,7 @@ const RegisterForm = {
                 .then(function (jsonResponse) {
                     if(jsonResponse.hasOwnProperty('id')){
                         self.displayFlash = false;
+                        console.log(jsonResponse);
                         localStorage.setItem("flash","User Successfully registered");
                         router.push('/login');
                     }else{
@@ -310,12 +311,14 @@ const newCar={
     template:
     `
     <div class="Newcarbox">
-    <div  v-if="displayFlash">
+    <div class="alert alert-success " v-if="status === 'success'" >{{message}}
+    </div>
+    <div class="alert alert-danger"  v-if="status === 'danger'">
     <ul>
     <li v-for="error in errors" class=""> {{error}} </li>
     </ul>
-    </div>   
-    <form v-on:submit.prevent="addCar"  method="POST" enctype="multipart/form-data" id="addCarForm" >
+    </div>
+   <form v-on:submit.prevent="addCar"  method="POST" enctype="multipart/form-data" id="addCarForm" >
         <div class="form-group">
             <label class="newcarLabel" for="make">Make</label>
             <input type="text"  id="make" name="make" class="form-control">
@@ -397,12 +400,14 @@ const newCar={
                 // display a success/error messagemessage
                 if(jsonResponse.hasOwnProperty('message')){
                     self.displayFlash = true;
-                    self.errors=jsonResponse.message;
+                    self.message=jsonResponse.message;
                     self.status='success';
+                    addCarForm.reset();
+
                 }else{
                     self.displayFlash = true;
+                    self.status='danger';
                     self.errors=jsonResponse.errors;
-
                 }
                 console.log(jsonResponse);
                 })
@@ -596,7 +601,7 @@ const Car={
 
      </div>
      <button  type="submit" name="submit" id="up" class="btn btn-primary"  >Email Owner</button>
-     <button  type="submit" name="submit" v-on:click="Fav(car.id)"><img src="/static/img/favourite.png">
+     <button  type="submit" name="submit" v-on:click="Fav"><img src="/static/img/favourite.png">
      </button> 
    </div>
      </div>
@@ -632,9 +637,10 @@ const Car={
     },
     methods: 
     {  
-        Fav:function(carid){
+        Fav:function(){
             let self = this;
-            fetch("/api/cars/"+parseInt(carid)+"/favourite", {
+            let car_id=this.$route.params.car_id
+            fetch("/api/cars/"+parseInt(car_id)+"/favourite", {
                 method: 'POST',
                 headers: {
                     Authorization: "Bearer " + localStorage.getItem("token"),
