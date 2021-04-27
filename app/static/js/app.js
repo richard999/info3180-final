@@ -102,11 +102,9 @@ const Home = {
         <div class = "left">
             <h2> Buy and Sell Cars Online </h2>
             <p> United Sales Auto Sales </p>
-
-        <div class = 'btns'>
             <button id="home_btn1" @click="$router.push('register')" type="button" class="btn btn-success">Register</button>
             <button id="home_btn2" @click="$router.push('login')" type="button" class="btn btn-primary">Login</button>
-             
+        </div>
         <div class = "image">
             <img src="/static/370z.jpg" alt="Nissan 370Z">
         </div>
@@ -126,26 +124,23 @@ const Home = {
 const LoginForm = {
     name: "login-form",
     template:`
-    <div class = 'login-container'>
-        <h2> Login to your account </h2>
-        <div class="alert alert-danger" v-if="isError">
-            <ul>
-                <li v-for="error in errors">{{ error }}</li>
-            </ul>
-        </div>
-    
-        <form v-on:submit.prevent="loginUser" method="POST" enctype="multipart/form-data" id="loginForm">
-        <div class="card">
-            <div class = "form-group">
-                <label> Username </label><br>
-                <input type="text" name="username" class="form-control"><br>
-                <label> Password </label><br>
-                <input type="password" name="password" class="form-control"><br>
-                <button class="btn btn-success" > Login </button>
-            </div>
-                
-            </div> 
-        </form>
+    <div>
+    <h2> Login to your account </h2>
+    <div class="alert alert-success " v-if="flash!==null" >{{flash}}</div>
+    <div  v-if="displayFlash">
+    <ul>
+    <li v-for="error in errors" class=""> {{error}} </li>
+    </ul>
+    </div>   
+    <form v-on:submit.prevent="loginUser" method="POST" enctype="multipart/form-data" id="loginForm">
+    <div class="form-group">
+        <label> Username </label><br>
+        <input type="text" name="username"><br>
+        <label> Password </label><br>
+        <input type="password" name="password"><br>
+    </div>
+        <button class="btn btn-primary mb-2" > Login </button>
+    </form>
     </div>
     
     `,
@@ -226,7 +221,7 @@ const LoginForm = {
 const RegisterForm = {
     name: "register-form",
     template:`
-    <div class= 'register-container>
+    <div>
     <h2> Register New User </h2>
     <div  v-if="displayFlash">
     <ul>
@@ -234,41 +229,26 @@ const RegisterForm = {
     </ul>
     </div>   
     <form v-on:submit.prevent="registerUser" method="POST" enctype="multipart/form-data" id="registerForm">
-    <div class= "regcard">
     <div class="form-group">
-        <div class = "form-row">
-            <div class = "col">
-                <label> Username </label><br>
-                <input type="text" class="form-control" name="username"><br>
-            </div>
-            <div class = "col">
-                <label> Password </label><br>
-                <input type="text" class="form-control" name="password"><br>
-            </div>
-        </div>
-        <div class = "form-row">
-            <div class = "col">
-                <label> Fullname </label><br>
-                <input type="text" class="form-control" name="fullname"><br>
-            </div>
-            <div class = "col">
-                <label> Email </label><br>
-                <input type="text" class="form-control" name="email"><br>
-            </div>
-        </div>
+        <label> Username </label><br>
+        <input type="text" name="username"><br>
+        <label> Password </label><br>
+        <input type="text" name="password"><br>
+        <label> Fullname </label><br>
+        <input type="text" name="fullname"><br>
+  
+        <label> Email </label><br>
+        <input type="text" name="email"><br>
         <label> Location </label><br>
-        <input type="text" class="form-control" name="location"><br>
+        <input type="text" name="location"><br>
         <label> Biography </label><br>
-        <textarea name="bio" class="form-control" > </textarea><br>
+        <textarea name="bio"> </textarea><br>
         <label> Upload Photo: </label><br>
-        <input type="file" name="pic" class="form-control-file" placeholder="Browse">
+        <input type="file" name="photo">
     </div>
-<div class="regbtn">
-    <button class="btn btn-success" > Register </button>
-</div>
-
-</form>
-</div>
+        <button class="btn btn-primary mb-2" > Register </button>
+    </form>
+    </div>
     
     `,
     data(){
@@ -492,60 +472,42 @@ const Logout ={
 const Explore ={
     name: 'Explore',
     template: `
-    <div>
-        <div class = "explore-container">
-            <h2> Explore </h2>
-            
-        
-            <form v-on:submit.prevent="exploreSearch" method="GET" enctype="multipart/form-data" id="searchForm">
-            <div class = "explore-card">
+     <div>
+        <div class="searchform"  >
+            <form  v-on:submit.prevent="Search" method="post"  id="searchBox">
                 <div class="form-group">
-                    <div class = "form-row">
-                        <div class = "col">
-                            <label> Make </label><br>
-                            <input type="text" class = "form-control" name="searchbymake" v-model="searchMake"><br>
-                        </div>
-                        <div class = "col">
-                            <label> Model </label><br>
-                            <input type="text" class = "form-control" name="searchbymodel" v-model="searchModel"><br>
-                        </div>
-                    
-                    </div>
-                    <div class = "explore-btn">
-                        <button class="btn btn-success" > Search </button>
-                    </div>
-                    
+                    <label class="searchLabel" for="make">Make</label>
+                    <input type="text"  id="make" name="make" class="form-control">
                 </div>
-            </div>
+                <div class="form-group">
+                    <label class="searchLabel" for="model">Model</label>
+                    <input type="text"  id="model" name="model" class="form-control">
+                </div>
+                <button  type="submit" name="submit" id="up" class="btn btn-sucess">Search</button>
             </form>
-            </div>
-            <ul class="explorelist">    
-            <li v-for="car in allcars">
-                
-                    <div class = "details-card-group">
-                        <div class ="details-card" style="width: 20rem;">
-                            <img class="card-img-top" id="car_img" :src="'/static/uploads/'  + car.photo" alt="car img"> 
-                                <div class = "card-body">
-                                    <div class = "top-card">
-                                        <h5 class = "card-title">  {{car.year}}  </h5>
-                                        <h5 class= "card-title">  {{car.make}}  </h5>
-                                        <div class="price">
-                                   <img id = "price-tag" src = "/static/price-tag.png">
-                                   <p class="card-text">  {{car.price}}  </p>
-                                </div>
-                                    </div>
-                                    <p class="card-text">  {{car.model}}  </p>
-                                </div>    
-                            
-                            <button @click="carinfo(car.id)" class="btn btn-primary btn-block"> View More Details </button>
+        </div>
+        <div class="exBody">
+            <div calss="carsBody">
+                <ul class="carslist" v-if="cars !==[]">
+                    <li v-for="car in cars" class="car"> 
+                      <div class="card ">
+                        <div class="card-body">
+                            <span class ="card-title">{{ car.year }} {{car.make}}}</span>
+                            <img v-bind:src="'/static/uploads/' + car.photo" /> 
+                            {{car.price}}
+                            {{car.model}}
+                            {{car.id}}
                         </div>
-                    </div>
-                
-            </li>
-            </ul>
-             
+                        <div class="btn btn-primary" id="viewCar">
+                        <router-link  class="nav-link" :to="{name: 'cars', params: { car_id : car.id}}" > View more details
+                        </router-link>
+                        </div>
+                      </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </div>
-    
     `,
     data(){
         return {
@@ -617,7 +579,8 @@ const Explore ={
 const Car={
     name: 'Car',
     template:
-     `     <div class="exBody">
+     `
+     <div class="exBody">
 
      <div class="alert alert-success " v-if="status === 'success'" >{{message}}
      </div>
@@ -645,7 +608,7 @@ const Car={
 
      </button> 
    </div>
-    </div>
+     </div>
      `,
     data(){
         return {
