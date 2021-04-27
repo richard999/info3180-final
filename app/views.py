@@ -192,7 +192,7 @@ def login():
 @requires_auth
 def logout():
     user=g.current_user
-     return jsonify(data={"user": user}, message="User Logged Out Successfully")
+    return jsonify(data={"user": user}, message="User Logged Out Successfully")
     
 
 @app.route("/api/cars",methods=["GET", "POST"])
