@@ -425,6 +425,8 @@ const newCar={
 
 
 }
+
+
 /**
  * 
  * Logout not working
@@ -440,18 +442,16 @@ const Logout ={
         if (localStorage.getItem("token")!==null) {
             fetch("/api/auth/logout", {
                 method: 'POST',
-                body:{},
                 headers: {
                     Authorization: "Bearer " + localStorage.getItem("token"),
-                    'X-CSRFToken': token,
-
+                    'X-CSRFToken': token
                 },
                 credentials: 'same-origin'
                 }).then(function (response) {
                  return response.json();
                 })
                 .then(function (jsonResponse) {
-                    //localStorage.removeItem("token");
+                    localStorage.removeItem("token");
                     console.log(jsonResponse);
                     router.push('/');
                 }).catch(function (error) {
@@ -601,7 +601,11 @@ const Car={
 
      </div>
      <button  type="submit" name="submit" id="up" class="btn btn-primary"  >Email Owner</button>
-     <button  type="submit" name="submit" v-on:click="Fav"><img src="/static/img/favourite.png">
+     <button  type="submit" name="submit" v-on:click="Fav">
+     <img src="/static/img/f1.png" v-if="switchState==false">
+     <img src="/static/img/f2.png" v-if="switchState">
+
+
      </button> 
    </div>
      </div>
@@ -609,6 +613,7 @@ const Car={
     data(){
         return {
             message:"",
+            switchState:false,
             car:null,
             errors: [],
             status: ''
@@ -634,7 +639,35 @@ const Car={
                 console.log(error);
             });
 
-    },
+    },mounted(){
+        let car_id=this.$route.params.car_id;
+        let self = this;
+        var decoded = jwtDecode(localStorage.getItem("token"));
+        let user_id=decoded.payload.user_id;
+        fetch("/api/users/"+user_id+"/favourites", {
+            method: 'GET',
+            headers:
+            {
+                'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                
+            },
+            credentials: 'same-origin'
+            }).then(function (response) {
+             return response.json();
+            }).then(function (jsonResponse) {
+            if (jsonResponse!=[]){
+                for (let i=0; i<jsonResponse.length ;i++) {
+                    if (jsonResponse[i].id==car_id){
+                        self.switchState=true;
+                        break
+                    } 
+                }
+            }
+            }).catch(function (error) {
+                console.log(error);
+            });
+
+     },
     methods: 
     {  
         Fav:function(){
@@ -660,6 +693,7 @@ const Car={
 
                 }else{
                     self.status='success';
+                    self.switchState=true;
                     self.message=jsonResponse.message;
 
                 }
