@@ -1,24 +1,16 @@
 body {
     padding-top: 5rem;
+    background-image: url("/static/back.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 800px;
 }
-.overlay {
-    position: absolute;
-    bottom: 0;
-    background: rgb(0, 0, 0);
-    background: blue; /* Black see-through */
-    color: #f1f1f1;
-    width: 100%;
-    transition: .5s ease;
-    opacity:0;
-    color: white;
-    font-size: 20px;
-    padding: 20px;
-    text-align: center;
-}
+
 
 .image img {
     width: 600px;
     height: 600px;
+    position: 
     padding-left: 30px;
     margin-right: 0;
 }
@@ -35,15 +27,50 @@ body {
 
 
 .container {
-    display: grid;
-    grid-template-rows: auto;
-    grid-template-columns: auto auto; 
-    margin: 20px 20px; 
-    grid-gap: 10px;
-    align-self:stretch; 
-    
+	
+
+	height: 100%
+	width:100%; 
+
 }
 
+.left{
+
+	position: absolute;
+	left:0px;
+	width:50%;
+	text-align: center;
+	padding-top: 150px;
+}
+.image{
+
+	position: absolute;
+	right: 0px;
+	width: 50%;
+	height: 100%;
+}
+.form-group{
+
+	display: block;
+	width: 50%;
+	margin-left: auto;
+	margin-right: auto;
+	border: 3px solid grey;
+	padding: 10px;
+
+}
+ h2{
+	text-align: center;
+}
+
+.Newcarbox{
+	display: block;
+	width: 50%;
+	margin-left: auto;
+	margin-right: auto;
+	border: 3px solid grey;
+	padding: 50px;
+}
 
 .left{
     grid: 1;
