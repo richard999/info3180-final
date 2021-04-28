@@ -76,21 +76,7 @@ app.component('app-header', {
  * 
  */
 
-app.component('app-footer', {
-    name: 'AppFooter',
-    template: `
-    <footer>
-        <div class="container">
-            <p>Copyright &copy; {{ year }} Flask Inc.</p>
-        </div>
-    </footer>
-    `,
-    data() {
-        return {
-            year: (new Date).getFullYear()
-        }
-    }
-});
+
 /**
  * Home
  * 
@@ -102,9 +88,12 @@ const Home = {
         <div class = "left">
             <h2> Buy and Sell Cars Online </h2>
             <p> United Sales Auto Sales </p>
+
+        <div class = 'btns'>
             <button id="home_btn1" @click="$router.push('register')" type="button" class="btn btn-success">Register</button>
             <button id="home_btn2" @click="$router.push('login')" type="button" class="btn btn-primary">Login</button>
-        </div>
+        </div>    
+        </div>   
         <div class = "image">
             <img src="/static/370z.jpg" alt="Nissan 370Z">
         </div>
@@ -124,23 +113,26 @@ const Home = {
 const LoginForm = {
     name: "login-form",
     template:`
-    <div>
-    <h2> Login to your account </h2>
-    <div class="alert alert-success " v-if="flash!==null" >{{flash}}</div>
-    <div  v-if="displayFlash">
-    <ul>
-    <li v-for="error in errors" class=""> {{error}} </li>
-    </ul>
-    </div>   
-    <form v-on:submit.prevent="loginUser" method="POST" enctype="multipart/form-data" id="loginForm">
-    <div class="form-group">
-        <label> Username </label><br>
-        <input type="text" name="username"><br>
-        <label> Password </label><br>
-        <input type="password" name="password"><br>
-    </div>
-        <button class="btn btn-primary mb-2" > Login </button>
-    </form>
+    <div class = 'login-container'>
+        <h2> Login to your account </h2>
+        <div class="alert alert-danger" v-if="isError">
+            <ul>
+                <li v-for="error in errors">{{ error }}</li>
+            </ul>
+        </div>
+    
+        <form v-on:submit.prevent="loginUser" method="POST" enctype="multipart/form-data" id="loginForm">
+        
+            <div class = "form-group">
+                <label> Username </label><br>
+                <input type="text" name="username" class="form-control"><br>
+                <label> Password </label><br>
+                <input type="password" name="password" class="form-control"><br>
+                <button class="btn btn-success" > Login </button>
+            </div>
+                
+             
+        </form>
     </div>
     
     `,
@@ -221,7 +213,7 @@ const LoginForm = {
 const RegisterForm = {
     name: "register-form",
     template:`
-    <div>
+    <div class= 'register-container'>
     <h2> Register New User </h2>
     <div  v-if="displayFlash">
     <ul>
@@ -229,26 +221,44 @@ const RegisterForm = {
     </ul>
     </div>   
     <form v-on:submit.prevent="registerUser" method="POST" enctype="multipart/form-data" id="registerForm">
+    <div class= "regcard">
     <div class="form-group">
-        <label> Username </label><br>
-        <input type="text" name="username"><br>
-        <label> Password </label><br>
-        <input type="text" name="password"><br>
-        <label> Fullname </label><br>
-        <input type="text" name="fullname"><br>
-  
-        <label> Email </label><br>
-        <input type="text" name="email"><br>
+        <div class = "form-row">
+            <div class = "col">
+                <label> Username </label><br>
+                <input type="text" class="form-control" name="username"><br>
+            </div>
+            <div class = "col">
+                <label> Password </label><br>
+                <input type="text" class="form-control" name="password"><br>
+            </div>
+        </div>
+        <div class = "form-row">
+            <div class = "col">
+                <label> Fullname </label><br>
+                <input type="text" class="form-control" name="fullname"><br>
+            </div>
+            <div class = "col">
+                <label> Email </label><br>
+                <input type="text" class="form-control" name="email"><br>
+            </div>
+        </div>
         <label> Location </label><br>
-        <input type="text" name="location"><br>
+        <input type="text" class="form-control" name="location"><br>
         <label> Biography </label><br>
-        <textarea name="bio"> </textarea><br>
+        <textarea name="bio" class="form-control" > </textarea><br>
         <label> Upload Photo: </label><br>
-        <input type="file" name="photo">
+        <input type="file" name="pic" class="form-control-file" placeholder="Browse">
+        <br>
+    <div class="regbtn">
+    <button class="btn btn-success" > Register </button>
     </div>
-        <button class="btn btn-primary mb-2" > Register </button>
-    </form>
+
     </div>
+
+
+</form>
+</div>
     
     `,
     data(){
@@ -279,7 +289,6 @@ const RegisterForm = {
                 .then(function (jsonResponse) {
                     if(jsonResponse.hasOwnProperty('id')){
                         self.displayFlash = false;
-                        console.log(jsonResponse);
                         localStorage.setItem("flash","User Successfully registered");
                         router.push('/login');
                     }else{
@@ -311,35 +320,34 @@ const newCar={
     template:
     `
     <div class="Newcarbox">
-    <div class="alert alert-success " v-if="status === 'success'" >{{message}}
-    </div>
-    <div class="alert alert-danger"  v-if="status === 'danger'">
+    <div  v-if="displayFlash">
     <ul>
     <li v-for="error in errors" class=""> {{error}} </li>
     </ul>
-    </div>
-   <form v-on:submit.prevent="addCar"  method="POST" enctype="multipart/form-data" id="addCarForm" >
-        <div class="form-group">
+    </div>  
+    <h2> Enter New Car </h2> 
+    <form v-on:submit.prevent="addCar"  method="POST" enctype="multipart/form-data" id="addCarForm" >
+        <div class="form-group1">
             <label class="newcarLabel" for="make">Make</label>
             <input type="text"  id="make" name="make" class="form-control">
         </div>
-        <div class="form-group">
+        <div class="form-group1">
             <label class="newcarLabel" for="model">Model</label>
             <input type="text"  id="model" name="model" class="form-control">
         </div>
-        <div class="form-group">
+        <div class="form-group1">
             <label class="newcarLabel" for="color">Colour</label>
             <input type="text"  id="color" name="color" class="form-control">
         </div>
-        <div class="form-group">
+        <div class="form-group1">
             <label class="newcarLabel" for="year">Year</label>
             <input type="text"  id="year" name="year" class="form-control">
         </div>
-        <div class="form-group">
+        <div class="form-group1">
             <label class="newcarLabel" for="price">Price</label>
             <input type="text"  id="price" name="price" class="form-control">
         </div>  
-        <div class="form-group">
+        <div class="form-group1">
             <label class="newcarLabel" for="cartype">Year</label>
             <select name="cartype" id="cartype">
                 <option value="Suv">Suv</option>
@@ -351,7 +359,7 @@ const newCar={
                 <option value="Bus">Bus</option>
             </select>         
         </div>
-        <div class="form-group">
+        <div class="form-group1">
             <label class="newcarLabel" for="transmission">Transmission</label>
             <select name="transmission" id="transmission">
                 <option value="Automatic">Automatic</option>
@@ -359,11 +367,11 @@ const newCar={
                 <option value="Electric">Electric</option>
             </select>         
         </div>   
-        <div class="form-group">
+        <div class="form-group1">
             <label class="imgup" for="description">Desscription</label>
             <textarea  id="description" name="description" class="form-control"></textarea>
     </div>
-    <div class="form-group">
+    <div class="form-group1">
         <label class="imgup" for="photo">Photo</label>
         <input type="file" class="form-control" id="photo" name="photo" >
     </div>
@@ -400,14 +408,12 @@ const newCar={
                 // display a success/error messagemessage
                 if(jsonResponse.hasOwnProperty('message')){
                     self.displayFlash = true;
-                    self.message=jsonResponse.message;
+                    self.errors=jsonResponse.message;
                     self.status='success';
-                    addCarForm.reset();
-
                 }else{
                     self.displayFlash = true;
-                    self.status='danger';
                     self.errors=jsonResponse.errors;
+
                 }
                 console.log(jsonResponse);
                 })
@@ -425,8 +431,6 @@ const newCar={
 
 
 }
-
-
 /**
  * 
  * Logout not working
@@ -442,16 +446,18 @@ const Logout ={
         if (localStorage.getItem("token")!==null) {
             fetch("/api/auth/logout", {
                 method: 'POST',
+                body:{},
                 headers: {
                     Authorization: "Bearer " + localStorage.getItem("token"),
-                    'X-CSRFToken': token
+                    'X-CSRFToken': token,
+
                 },
                 credentials: 'same-origin'
                 }).then(function (response) {
                  return response.json();
                 })
                 .then(function (jsonResponse) {
-                    localStorage.removeItem("token");
+                    //localStorage.removeItem("token");
                     console.log(jsonResponse);
                     router.push('/');
                 }).catch(function (error) {
@@ -472,42 +478,60 @@ const Logout ={
 const Explore ={
     name: 'Explore',
     template: `
-     <div>
-        <div class="searchform"  >
-            <form  v-on:submit.prevent="Search" method="post"  id="searchBox">
+    <div>
+        <div class = "explore-container">
+            <h2> Explore </h2>
+            
+        
+            <form v-on:submit.prevent="exploreSearch" method="GET" enctype="multipart/form-data" id="searchForm">
+            <div class = "explore-card">
                 <div class="form-group">
-                    <label class="searchLabel" for="make">Make</label>
-                    <input type="text"  id="make" name="make" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label class="searchLabel" for="model">Model</label>
-                    <input type="text"  id="model" name="model" class="form-control">
-                </div>
-                <button  type="submit" name="submit" id="up" class="btn btn-sucess">Search</button>
-            </form>
-        </div>
-        <div class="exBody">
-            <div calss="carsBody">
-                <ul class="carslist" v-if="cars !==[]">
-                    <li v-for="car in cars" class="car"> 
-                      <div class="card ">
-                        <div class="card-body">
-                            <span class ="card-title">{{ car.year }} {{car.make}}}</span>
-                            <img v-bind:src="'/static/uploads/' + car.photo" /> 
-                            {{car.price}}
-                            {{car.model}}
-                            {{car.id}}
+                    <div class = "form-row">
+                        <div class = "col">
+                            <label> Make </label><br>
+                            <input type="text" class = "form-control" name="searchbymake" v-model="searchMake"><br>
                         </div>
-                        <div class="btn btn-primary" id="viewCar">
-                        <router-link  class="nav-link" :to="{name: 'cars', params: { car_id : car.id}}" > View more details
-                        </router-link>
+                        <div class = "col">
+                            <label> Model </label><br>
+                            <input type="text" class = "form-control" name="searchbymodel" v-model="searchModel"><br>
                         </div>
-                      </div>
-                    </li>
-                </ul>
+                    
+                    </div>
+                    <div class = "explore-btn">
+                        <button class="btn btn-success" > Search </button>
+                    </div>
+                    
+                </div>
             </div>
-        </div>
+            </form>
+            </div>
+            <ul class="explorelist">    
+            <li v-for="car in allcars">
+                
+                    <div class = "details-card-group">
+                        <div class ="details-card" style="width: 20rem;">
+                            <img class="card-img-top" id="car_img" :src="'/static/uploads/'  + car.photo" alt="car img"> 
+                                <div class = "card-body">
+                                    <div class = "top-card">
+                                        <h5 class = "card-title">  {{car.year}}  </h5>
+                                        <h5 class= "card-title">  {{car.make}}  </h5>
+                                        <div class="price">
+                                   <img id = "price-tag" src = "/static/price-tag.png">
+                                   <p class="card-text">  {{car.price}}  </p>
+                                </div>
+                                    </div>
+                                    <p class="card-text">  {{car.model}}  </p>
+                                </div>    
+                            
+                            <button @click="carinfo(car.id)" class="btn btn-primary btn-block"> View More Details </button>
+                        </div>
+                    </div>
+                
+            </li>
+            </ul>
+             
     </div>
+    
     `,
     data(){
         return {
@@ -580,40 +604,54 @@ const Car={
     name: 'Car',
     template:
      `
-     <div class="exBody">
-
-     <div class="alert alert-success " v-if="status === 'success'" >{{message}}
-     </div>
-     <div class="alert alert-danger"  v-if="status === 'danger'">
-     <ul>
-     <li v-for="error in errors" class=""> {{error}} </li>
-     </ul>
-     </div>
-
-
-        <div class="card " v-if="car !==null">
-         <div class="card-body">
-         <span class ="card-title">{{ car.year }} {{car.make}}}</span>
-         <img v-bind:src="'/static/uploads/' + car.photo" /> 
-         {{car.description}}
-         {{car.price}}
-         {{car.model}}
-
-     </div>
-     <button  type="submit" name="submit" id="up" class="btn btn-primary"  >Email Owner</button>
-     <button  type="submit" name="submit" v-on:click="Fav">
-     <img src="/static/img/f1.png" v-if="switchState==false">
-     <img src="/static/img/f2.png" v-if="switchState">
-
-
-     </button> 
-   </div>
-     </div>
+     <div class="container-fluid">
+            <div class="carinfocard">
+                <div class="img-square-wrapper">
+                    <img id="car_img" :src="'/static/uploads/' + photo" alt="car img" class="card-img-top"> 
+                </div>
+                <div class = "card-body">
+                    <div class = "yearmake">
+                            <h2 class = "card-title">  {{ year }}  {{ make }} </h2> <br> 
+                    </div>
+                    <p class="model"> {{model}} </p>  
+                    <p class="card-text"> {{description}} </p>
+                    <div class = "form-row">
+                        <div class = "col">
+                            <label>Colour</label>
+                            <p class="card-text"> {{colour}} </p> <br>
+                        </div>
+                        <div class = "col">
+                            <label>Body Type</label>
+                            <p class="card-text"> {{car_type}} </p> <br>
+                        </div>
+                    </div>
+                    <div class = "form-row">
+                        <div class = "col">
+                            <label>Price</label>
+                            <p class="card-text"> {{price}} </p> <br>
+                        </div>
+                        <div class = "col">
+                            <label>Transmission</label>
+                            <p class="card-text"> {{transmission}} </p> <br>
+                        </div>
+                    </div>
+                    <div class = "carinfobtns">
+                        <button class="btn btn-success" > Email Owner </button>
+                        <button v-if="faved" type="button" class="btn btn-default btn-circle">
+                            <img src="/static/img/favorite.png"> 
+                        </button>
+                        <button v-else" @click="favouritecar(car_id)" type = "button" class="btn btn-default btn-circle" >  
+                            <img src="/static/img/outline.png"> 
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
      `,
     data(){
         return {
             message:"",
-            switchState:false,
             car:null,
             errors: [],
             status: ''
@@ -639,41 +677,12 @@ const Car={
                 console.log(error);
             });
 
-    },mounted(){
-        let car_id=this.$route.params.car_id;
-        let self = this;
-        var decoded = jwtDecode(localStorage.getItem("token"));
-        let user_id=decoded.payload.user_id;
-        fetch("/api/users/"+user_id+"/favourites", {
-            method: 'GET',
-            headers:
-            {
-                'Authorization': 'Bearer ' + localStorage.getItem('token'),
-                
-            },
-            credentials: 'same-origin'
-            }).then(function (response) {
-             return response.json();
-            }).then(function (jsonResponse) {
-            if (jsonResponse!=[]){
-                for (let i=0; i<jsonResponse.length ;i++) {
-                    if (jsonResponse[i].id==car_id){
-                        self.switchState=true;
-                        break
-                    } 
-                }
-            }
-            }).catch(function (error) {
-                console.log(error);
-            });
-
-     },
+    },
     methods: 
     {  
-        Fav:function(){
+        Fav:function(carid){
             let self = this;
-            let car_id=this.$route.params.car_id
-            fetch("/api/cars/"+parseInt(car_id)+"/favourite", {
+            fetch("/api/cars/"+parseInt(carid)+"/favourite", {
                 method: 'POST',
                 headers: {
                     Authorization: "Bearer " + localStorage.getItem("token"),
@@ -693,7 +702,6 @@ const Car={
 
                 }else{
                     self.status='success';
-                    self.switchState=true;
                     self.message=jsonResponse.message;
 
                 }
