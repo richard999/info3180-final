@@ -155,6 +155,9 @@ const LoginForm = {
             
         }
     },
+    beforeRouteUpdate (to, from, next) {
+        location.reload();
+    },      
     beforeMount(){
 
         this.flash=localStorage.getItem("flash");
