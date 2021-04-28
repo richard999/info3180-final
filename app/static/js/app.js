@@ -101,7 +101,10 @@ const Home = {
     `,
     data() {
         return {}
-    }
+    },mounted(){
+        //location.reload();
+    },
+
 };
 
 
@@ -506,10 +509,10 @@ const Explore ={
             </form>
             </div>
             <ul class="explorelist">    
-            <li v-for="car in allcars">
+            <li v-for="car in cars">
                 
                     <div class = "details-card-group">
-                        <div class ="details-card" style="width: 20rem;">
+                        <div class ="details-card" style="width: 20rem">
                             <img class="card-img-top" id="car_img" :src="'/static/uploads/'  + car.photo" alt="car img"> 
                                 <div class = "card-body">
                                     <div class = "top-card">
@@ -539,6 +542,9 @@ const Explore ={
             erros: [],
             status: ''
             }
+    },
+    mounted(){
+        //location.reload();
     },
     created(){
         let self = this;
